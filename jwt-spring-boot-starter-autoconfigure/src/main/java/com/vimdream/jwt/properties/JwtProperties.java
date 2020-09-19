@@ -13,6 +13,9 @@ import java.security.PublicKey;
 @Data
 public class JwtProperties {
 
+    private boolean enabled = false;
+    private boolean enabledService = false;
+
     private String secret = "vimdream@(jwt}*^31)&hao6631%f3q2";
     private String pubKeyPath = "id_rsa.pub";
     private String priKeyPath = "id_rsa";
