@@ -2,6 +2,7 @@ package com.vimdream.jwt.config;
 
 import com.vimdream.jwt.aspect.Authenticate;
 import com.vimdream.jwt.aspect.EntityAutowired;
+import com.vimdream.jwt.controller.JwtController;
 import com.vimdream.jwt.handler.JwtHandler;
 import com.vimdream.jwt.properties.JwtProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,5 +43,11 @@ public class JwtConfiguration {
     @Bean
     public EntityAutowired entityAutowired() {
         return new EntityAutowired();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "vimdream.jwt", name = "enabled-service", havingValue = "true")
+    public JwtController jwtController() {
+        return new JwtController();
     }
 }
