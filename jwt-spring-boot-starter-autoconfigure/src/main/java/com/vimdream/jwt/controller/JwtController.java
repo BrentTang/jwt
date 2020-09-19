@@ -22,7 +22,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/jwt")
-@ConditionalOnProperty(prefix = "vimdream.jwt", name = "enabledService", havingValue = "true")
+@ConditionalOnProperty(prefix = "vimdream.jwt", name = "enabled-service", havingValue = "true")
 public class JwtController {
 
     @Autowired
