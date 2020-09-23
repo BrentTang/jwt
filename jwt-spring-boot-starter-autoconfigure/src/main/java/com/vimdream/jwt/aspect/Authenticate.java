@@ -223,7 +223,7 @@ public class Authenticate {
 
     /**
      * 权限匹配
-     * @param needAuthority  需要的权限
+     * @param needAuthority  需要的权限  支持  "p1 | p2, p3"  =>  (p1, p3), (p2, p3)
      * @param authority  用户权限
      * @return
      */
@@ -236,7 +236,25 @@ public class Authenticate {
         String[] needPermission = needAuthority.split(JwtConstant.AUTHORITY_SEPARATOR);
         return Arrays.stream(needPermission)
                 .filter(auth -> StringUtil.isNotBlank(auth))
-                .allMatch(p -> authority.contains(p.trim()));
+                .allMatch(p -> match(p, authority));
     }
 
+    /**
+     * 检查是否符合
+     * @param permission  p1 | p2 或 p1
+     * @param authority  用户的权限
+     * @return
+     */
+    protected static boolean match(String permission, Set<String> authority) {
+
+        String need = permission.trim();
+        if (need.contains(JwtConstant.AUTHORITY_LOGIC_OR)) {
+            String[] subP = need.split(JwtConstant.AUTHORITY_LOGIC_OR_REGEX);
+            return Arrays.stream(subP)
+                    .filter(p -> StringUtil.isNotBlank(p))
+                    .anyMatch(p -> authority.contains(p));
+        }
+        return authority.contains(need);
+
+    }
 }
