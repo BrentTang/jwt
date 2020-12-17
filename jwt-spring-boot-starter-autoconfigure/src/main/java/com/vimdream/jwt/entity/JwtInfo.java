@@ -1,6 +1,6 @@
 package com.vimdream.jwt.entity;
 
-import com.vimdream.htool.json.JsonUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.vimdream.htool.string.StringUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
@@ -48,6 +48,6 @@ public class JwtInfo implements TokenInfo {
     public <T> T convert(Class<T> clazz) {
         if (StringUtil.isBlank(customInfo))
             return null;
-        return JsonUtil.parse(customInfo, clazz);
+        return JSONObject.parseObject(customInfo, clazz);
     }
 }

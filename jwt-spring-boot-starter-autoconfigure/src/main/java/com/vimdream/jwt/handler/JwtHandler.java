@@ -1,6 +1,6 @@
 package com.vimdream.jwt.handler;
 
-import com.vimdream.htool.json.JsonUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.vimdream.htool.string.StringUtil;
 import com.vimdream.jwt.entity.JwtInfo;
 import com.vimdream.jwt.exception.JWTException;
@@ -38,7 +38,7 @@ public class JwtHandler {
      */
     public String generateToken(Object customInfo, Long expire, Integer tokenType) {
         try {
-            JwtInfo jwtInfo = new JwtInfo(JsonUtil.serialize(customInfo), tokenType);
+            JwtInfo jwtInfo = new JwtInfo(JSONObject.toJSONString(customInfo), tokenType);
             return JwtUtil.generateToken(jwtInfo, jwtProperties.getPrivateKey(), expire != null ? expire : jwtProperties.getExpire());
         } catch (Exception e) {
             throw new JWTException("数据序列化失败");
@@ -123,7 +123,7 @@ public class JwtHandler {
         JwtInfo jwtInfo = JwtUtil.getInfoFromToken(token, jwtProperties.getPublicKey(), JwtInfo.class);
         if (jwtInfo != null && StringUtil.isNotBlank(jwtInfo.getCustomInfo())) {
             try {
-                return JsonUtil.parse(jwtInfo.getCustomInfo(), clazz);
+                return JSONObject.parseObject(jwtInfo.getCustomInfo(), clazz);
             } catch (Exception e) {
                 return (T) StringUtil.convert(jwtInfo.getCustomInfo(), clazz);
             }

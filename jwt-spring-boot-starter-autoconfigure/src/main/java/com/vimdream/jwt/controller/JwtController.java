@@ -1,11 +1,10 @@
 package com.vimdream.jwt.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.vimdream.htool.string.StringUtil;
 import com.vimdream.jwt.handler.JwtHandler;
 import com.vimdream.jwt.properties.JwtProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +30,7 @@ public class JwtController {
     public ResponseEntity<?> refreshToken(@RequestParam("refresh_token") String refreshToken) {
         JwtProperties jwtProperties = jwtHandler.getJwtProperties();
         Map<String, String> token = jwtHandler.refreshToken(refreshToken);
-        if (StringUtil.isBlank(jwtProperties.getRefreshTokenTemplate())) {
+        if (StringUtils.isBlank(jwtProperties.getRefreshTokenTemplate())) {
             return ResponseEntity.ok(token);
         }
 
