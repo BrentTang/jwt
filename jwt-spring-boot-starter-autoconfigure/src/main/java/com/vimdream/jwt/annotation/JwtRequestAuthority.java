@@ -9,7 +9,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JwtRequestAuthority {
 
+    /**
+     * 需要的权限  支持  "p1 | p2, p3"  =>  存在p1或p2 并且 存在p3
+     * @return
+     */
     String authority() default "";
+
     /**
      * token反序列化的实体class
      * @return

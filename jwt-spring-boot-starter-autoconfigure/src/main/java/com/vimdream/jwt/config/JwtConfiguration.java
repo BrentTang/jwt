@@ -4,12 +4,18 @@ import com.vimdream.jwt.aspect.Authenticate;
 import com.vimdream.jwt.aspect.EntityAutowired;
 import com.vimdream.jwt.controller.JwtController;
 import com.vimdream.jwt.handler.JwtHandler;
+import com.vimdream.jwt.interceptor.JwtAuthenticateInterceptorChain;
+import com.vimdream.jwt.interceptor.JwtInterceptorChain;
 import com.vimdream.jwt.properties.JwtProperties;
+import com.vimdream.jwt.service.JwtService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Import;
 
 /**
  * @Title: JwtConfiguration
@@ -21,18 +27,31 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @Configuration
 @EnableAspectJAutoProxy
 @EnableConfigurationProperties(JwtProperties.class)
-@ConditionalOnProperty(prefix = "vimdream.jwt", name = "enabled", havingValue = "true")
+//@ConditionalOnProperty(prefix = "vimdream.jwt", name = "enabled", havingValue = "true")
+@ConditionalOnBean(JwtMarkerConfiguration.Marker.class)
+@Import({JwtHandler.class})
 public class JwtConfiguration {
 
+    @Autowired
     private JwtProperties jwtProperties;
 
-    public JwtConfiguration(JwtProperties jwtProperties) {
-        this.jwtProperties = jwtProperties;
+//    public JwtConfiguration(JwtProperties jwtProperties) {
+//        this.jwtProperties = jwtProperties;
+//    }
+
+    @Bean
+    public JwtHandler jwtHandler() {
+        return new JwtHandler(jwtProperties, jwtInterceptorChain());
     }
 
-    @Bean(name = "jwtHandler")
-    public JwtHandler jwtHandler() {
-        return new JwtHandler(jwtProperties);
+    @Bean
+    public JwtInterceptorChain jwtInterceptorChain() {
+        return new JwtInterceptorChain();
+    }
+
+    @Bean
+    public JwtAuthenticateInterceptorChain jwtAuthenticateInterceptorChain() {
+        return new JwtAuthenticateInterceptorChain();
     }
 
     @Bean
@@ -46,7 +65,8 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "vimdream.jwt", name = "enabled-service", havingValue = "true")
+//    @ConditionalOnProperty(prefix = "vimdream.jwt", name = "enabled-service", havingValue = "true")
+    @ConditionalOnBean(JwtServiceMarkerConfiguration.Marker.class)
     public JwtController jwtController() {
         return new JwtController();
     }

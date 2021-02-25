@@ -12,6 +12,8 @@ import com.vimdream.jwt.entity.JwtRequestAuthorityProps;
 import com.vimdream.jwt.exception.JWTException;
 import com.vimdream.jwt.exception.JWTExecuteException;
 import com.vimdream.jwt.handler.JwtHandler;
+import com.vimdream.jwt.interceptor.JwtAuthenticateInterceptorChain;
+import com.vimdream.jwt.interceptor.JwtInterceptor;
 import com.vimdream.jwt.util.JwtConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -24,6 +26,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -40,6 +43,8 @@ public class Authenticate {
 
     @Autowired
     private JwtHandler jwtHandler;
+    @Autowired
+    private JwtAuthenticateInterceptorChain jwtAuthenticateInterceptorChain;
 
     /**
      * 参数索引缓存
@@ -82,7 +87,12 @@ public class Authenticate {
         if (attributes == null)
             throw new JWTException("无效的request");
 
+        String token = jwtHandler.selectToken(attributes.getRequest());
         Object entityArg = jwtHandler.parseToken(attributes.getRequest(), props.getEntity());
+
+        if (!jwtAuthenticateInterceptorChain.beforeAuthenticate(token, entityArg)) {
+            return null;
+        }
 
         // 无需权限
         if (StringUtil.isBlank(props.getAuthority())) {
@@ -223,7 +233,7 @@ public class Authenticate {
 
     /**
      * 权限匹配
-     * @param needAuthority  需要的权限  支持  "p1 | p2, p3"  =>  (p1, p3), (p2, p3)
+     * @param needAuthority  需要的权限  支持  "p1 | p2, p3"  =>  存在p1或p2 并且 存在p3
      * @param authority  用户权限
      * @return
      */
@@ -252,7 +262,7 @@ public class Authenticate {
             String[] subP = need.split(JwtConstant.AUTHORITY_LOGIC_OR_REGEX);
             return Arrays.stream(subP)
                     .filter(p -> StringUtil.isNotBlank(p))
-                    .anyMatch(p -> authority.contains(p));
+                    .anyMatch(p -> authority.contains(p.trim()));
         }
         return authority.contains(need);
 

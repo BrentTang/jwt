@@ -1,6 +1,8 @@
 package com.vimdream.jwt.entity;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.vimdream.htool.string.StringUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
@@ -19,7 +21,11 @@ import lombok.*;
 @RequiredArgsConstructor
 public class JwtInfo implements TokenInfo {
 
+    public static final boolean fieldBased = true;
+    public static final SerializeConfig serializeConfig = new SerializeConfig(fieldBased);
+
     @NonNull
+    @JSONField(jsonDirect = true)
     private String customInfo;
     private Integer type;
 
