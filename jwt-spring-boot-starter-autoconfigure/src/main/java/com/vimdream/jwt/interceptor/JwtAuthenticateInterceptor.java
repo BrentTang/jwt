@@ -11,7 +11,8 @@ public interface JwtAuthenticateInterceptor {
     /**
      * 认证前拦截
      * @param token
-     * @return
+     * @param payload token数据
+     * @return true 继续执行  false 中断执行
      */
     boolean beforeAuthenticate(String token, Object payload);
 

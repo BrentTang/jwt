@@ -13,14 +13,14 @@ public interface JwtInterceptor {
     /**
      * 生成前执行
      * @param payload
-     * @return
+     * @return true 继续执行  false 中断执行
      */
     boolean beforeGenerateToken(Object payload);
 
     /**
      * 生成后执行
      * @param payload
-     * @return
+     * @return true 继续执行  false 中断执行
      */
     boolean afterGenerateToken(Object payload, String token);
 
@@ -28,7 +28,7 @@ public interface JwtInterceptor {
      * 解析前执行
      * 解析token与refreshToken时都会调
      * @param token
-     * @return true continue
+     * @return true 继续执行  false 中断执行
      */
     boolean beforeParseToken(String token);
 
@@ -37,7 +37,7 @@ public interface JwtInterceptor {
      * 解析token与refreshToken时都会调
      * @param token
      * @param payload
-     * @return
+     * @return true 继续执行  false 中断执行
      */
     boolean afterParseToken(String token, Object payload);
 
@@ -45,7 +45,7 @@ public interface JwtInterceptor {
      * 刷新前执行
      * @param refreshToken
      * @param payload
-     * @return
+     * @return true 继续执行  false 中断执行
      */
     boolean beforeRefreshToken(String refreshToken, String payload);
 
@@ -53,7 +53,7 @@ public interface JwtInterceptor {
      * 刷新后执行
      * @param refreshToken
      * @param newToken
-     * @return true continue
+     * @return true 继续执行  false 中断执行
      */
     boolean afterRefreshToken(String refreshToken, Map<String, String> newToken);
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 
 /**
@@ -28,26 +29,24 @@ public class JwtController {
 
     @Autowired
     private JwtHandler jwtHandler;
-    @Autowired
-    private JwtInterceptorChain jwtInterceptorChain;
+
+    private String refreshTokenTemplate;
+    private String resultPlaceholder;
+
+    @PostConstruct
+    public void init() {
+        JwtProperties jwtProperties = jwtHandler.getJwtProperties();
+        this.refreshTokenTemplate = jwtProperties.getRefreshTokenTemplate();
+        this.resultPlaceholder = jwtProperties.getResultPlaceholder();
+    }
 
     @GetMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam("refresh_token") String refreshToken) {
-        JwtProperties jwtProperties = jwtHandler.getJwtProperties();
-        /*if (!jwtInterceptorChain.beforeRefreshToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }*/
         Map<String, String> token = jwtHandler.refreshToken(refreshToken);
-        /*if (jwtInterceptorChain.afterRefreshToken(refreshToken, token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }*/
-        if (StringUtils.isBlank(jwtProperties.getRefreshTokenTemplate())) {
+        if (StringUtils.isBlank(refreshTokenTemplate)) {
             return ResponseEntity.ok(token);
         }
-
-        String refreshTokenTemplate = jwtProperties.getRefreshTokenTemplate();
-        String result = refreshTokenTemplate.replaceAll(jwtProperties.getResultPlaceholder(), JSONObject.toJSONString(token));
-
+        String result = refreshTokenTemplate.replaceAll(resultPlaceholder, JSONObject.toJSONString(token));
         return ResponseEntity.ok(JSONObject.parse(result));
     }
 

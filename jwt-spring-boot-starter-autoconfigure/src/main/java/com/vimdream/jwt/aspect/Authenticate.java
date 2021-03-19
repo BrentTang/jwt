@@ -9,6 +9,7 @@ import com.vimdream.jwt.annotation.JwtRequestAuthority;
 import com.vimdream.jwt.entity.CustomAuthority;
 import com.vimdream.jwt.entity.JwtAttribute;
 import com.vimdream.jwt.entity.JwtRequestAuthorityProps;
+import com.vimdream.jwt.entity.ResourceAuthority;
 import com.vimdream.jwt.exception.JWTException;
 import com.vimdream.jwt.exception.JWTExecuteException;
 import com.vimdream.jwt.handler.JwtHandler;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
@@ -45,6 +47,8 @@ public class Authenticate {
     private JwtHandler jwtHandler;
     @Autowired
     private JwtAuthenticateInterceptorChain jwtAuthenticateInterceptorChain;
+    @Autowired(required = false)
+    private ResourceAuthority resourceAuthority;
 
     /**
      * 参数索引缓存
@@ -87,11 +91,17 @@ public class Authenticate {
         if (attributes == null)
             throw new JWTException("无效的request");
 
-        String token = jwtHandler.selectToken(attributes.getRequest());
+        HttpServletRequest request = attributes.getRequest();
+        String token = jwtHandler.selectToken(request);
         Object entityArg = jwtHandler.parseToken(attributes.getRequest(), props.getEntity());
 
         if (!jwtAuthenticateInterceptorChain.beforeAuthenticate(token, entityArg)) {
             return null;
+        }
+
+        // 当前请求路径 对应的 权限
+        if (resourceAuthority != null) {
+            props.setAuthority(resourceAuthority.getAuthority(request.getRequestURI()));
         }
 
         // 无需权限
